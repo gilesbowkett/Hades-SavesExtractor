@@ -29,6 +29,7 @@ class HadesSaveData {
     uint32_t accumulatedMetaPoints;
     uint32_t activeShrinePoints;
     uint32_t metaUpgradeLevel; // Hades 2
+    uint32_t cosmeticsPoints;  // Hades 2 PATH 11
     uint8_t easyMode;
     uint8_t hardMode;
     std::vector<std::string> notableLuaData;

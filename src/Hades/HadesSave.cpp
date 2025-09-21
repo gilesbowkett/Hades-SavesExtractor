@@ -32,9 +32,18 @@ bool HadesSaveData::read(const std::vector<uint8_t> &buffer) {
     SAFE_PARSER_READ(parser, complectedRuns)
     SAFE_PARSER_READ(parser, accumulatedMetaPoints)
     SAFE_PARSER_READ(parser, activeShrinePoints)
-    if (getGameVersion() == eGameVersion::HADES2) {
+
+    switch (getGameVersion()) {
+    case eGameVersion::HADES2:
+    case eGameVersion::HADES2_PATH11:
         SAFE_PARSER_READ(parser, metaUpgradeLevel)
+        break;
     }
+
+    if (getGameVersion() == eGameVersion::HADES2_PATH11) {
+        SAFE_PARSER_READ(parser, cosmeticsPoints)
+    }
+
     SAFE_PARSER_READ(parser, easyMode)
     SAFE_PARSER_READ(parser, hardMode)
     SAFE_PARSER_READ(parser, notableLuaData)
@@ -67,9 +76,18 @@ bool HadesSaveData::write(std::vector<uint8_t> &binary) {
     SAFE_PARSER_WRITE(writter, complectedRuns)
     SAFE_PARSER_WRITE(writter, accumulatedMetaPoints)
     SAFE_PARSER_WRITE(writter, activeShrinePoints)
-    if (getGameVersion() == eGameVersion::HADES2) {
+
+    switch (getGameVersion()) {
+    case eGameVersion::HADES2:
+    case eGameVersion::HADES2_PATH11:
         SAFE_PARSER_WRITE(writter, metaUpgradeLevel)
+        break;
     }
+
+    if (getGameVersion() == eGameVersion::HADES2_PATH11) {
+        SAFE_PARSER_WRITE(writter, cosmeticsPoints)
+    }
+
     SAFE_PARSER_WRITE(writter, easyMode)
     SAFE_PARSER_WRITE(writter, hardMode)
     SAFE_PARSER_WRITE(writter, notableLuaData)

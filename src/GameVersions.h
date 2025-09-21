@@ -8,4 +8,5 @@
 enum class eGameVersion {
     HADES = 0x10,
     HADES2 = 0x11,
+    HADES2_PATH11 = 0x12,
 };

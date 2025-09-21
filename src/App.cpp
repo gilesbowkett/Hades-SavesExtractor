@@ -45,13 +45,14 @@ bool App::extract(const std::string_view inputFilePath, std::ofstream &outputFil
     }
 
     switch (static_cast<eGameVersion>(header->gameVersion)) {
+    case eGameVersion::HADES2_PATH11:
     case eGameVersion::HADES2:
     case eGameVersion::HADES: {
         HadesSaveConverter::ToLua(buffer, outputFile);
         break;
     }
     default:
-        std::cerr << "Unknown game version." << std::endl;
+        std::cerr << "Unknown game version: " << header->gameVersion << std::endl;
         return false;
     }
 
@@ -75,6 +76,7 @@ bool App::import(const std::string_view inputFile, std::ofstream &outputFile) {
     LuaReadHelper::readGlobal(L, "GAME_VERSION", gameVersion);
 
     switch (static_cast<eGameVersion>(gameVersion)) {
+    case eGameVersion::HADES2_PATH11:
     case eGameVersion::HADES2:
     case eGameVersion::HADES:
         HadesSaveConverter::FromLua(L, outputFile);
