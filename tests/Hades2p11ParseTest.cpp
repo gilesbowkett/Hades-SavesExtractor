@@ -21,12 +21,11 @@ int main() {
     bool result = App::extract("./Hades2_p11.sav", out);
 
     out.close();
+    std::filesystem::remove("./Hades2p11ParseTestOut.lua");
 
     if (!result) {
         return 1;
     }
-
-    //std::filesystem::remove("./Hades2p11ParseTestOut.lua");
 
     return 0;
 }
