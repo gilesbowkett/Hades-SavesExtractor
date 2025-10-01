@@ -16,7 +16,8 @@ constexpr uint32_t SGG_HEADER_MAGIC = 0x31424753;
 struct SaveHeader {
     uint32_t magic{};
     uint32_t checkSum{};
-    uint32_t gameVersion{};
+    uint16_t gameVersion{};
+    uint16_t saveFlags{};
 };
 
 bool App::extract(const std::string_view inputFilePath, std::ofstream &outputFile) {

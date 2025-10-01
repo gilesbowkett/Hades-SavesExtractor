@@ -23,6 +23,7 @@ bool HadesSaveConverter::ToLua(std::vector<uint8_t> &buffer, std::ofstream &outF
     LuaFileWriteHelper::writeGlobal(outFile, "MAGIC", save.magic);
     LuaFileWriteHelper::writeGlobal(outFile, "CHECKSUM", save.checksum);
     LuaFileWriteHelper::writeGlobal(outFile, "GAME_VERSION", save.gameVersion);
+    LuaFileWriteHelper::writeGlobal(outFile, "SAVE_FLAGS", save.saveFlags);
     LuaFileWriteHelper::writeGlobal(outFile, "TIMESTAMP", save.timestamp);
     LuaFileWriteHelper::writeGlobal(outFile, "LOCATION", save.location);
     LuaFileWriteHelper::writeGlobal(outFile, "COMPLETED_RUNS", save.complectedRuns);
@@ -57,6 +58,7 @@ bool HadesSaveConverter::FromLua(lua_State *L, std::ofstream &outputFile) {
     LuaReadHelper::readGlobal(L, "MAGIC", save.magic);
     LuaReadHelper::readGlobal(L, "CHECKSUM", save.checksum);
     LuaReadHelper::readGlobal(L, "GAME_VERSION", save.gameVersion);
+    LuaReadHelper::readGlobal(L, "SAVE_FLAGS", save.saveFlags);
     LuaReadHelper::readGlobal(L, "TIMESTAMP", save.timestamp);
     LuaReadHelper::readGlobal(L, "LOCATION", save.location);
     LuaReadHelper::readGlobal(L, "COMPLETED_RUNS", save.complectedRuns);

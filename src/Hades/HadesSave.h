@@ -21,7 +21,8 @@ class HadesSaveData {
 
     uint32_t magic;
     uint32_t checksum;
-    uint32_t gameVersion;
+    uint16_t gameVersion;
+    uint16_t saveFlags;
     uint64_t timestamp;
 
     std::string location;

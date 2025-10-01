@@ -58,10 +58,19 @@ target_include_directories(HadesSavesExtractor PUBLIC
 add_executable(Hades2ParseTest tests/Hades2ParseTest.cpp)
 target_link_libraries(Hades2ParseTest PRIVATE HadesSavesExtractorLib)
 
+add_executable(Hades2p11ParseTest tests/Hades2p11ParseTest.cpp)
+target_link_libraries(Hades2p11ParseTest PRIVATE HadesSavesExtractorLib)
+
 enable_testing()
 
 add_test(
   NAME Hades2ParseTest
   COMMAND $<TARGET_FILE:Hades2ParseTest>
+  WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/tests
+)
+
+add_test(
+  NAME Hades2p11ParseTest
+  COMMAND $<TARGET_FILE:Hades2p11ParseTest>
   WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/tests
 )
