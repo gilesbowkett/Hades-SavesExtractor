@@ -12,6 +12,11 @@ The repository already produces a command-line executable (`HadesSavesExtractor`
 
 ```bash
 cd /Users/giles/code/Hades-SavesExtractor
+
+# Initialize git submodules (required on first build)
+git submodule update --init --recursive
+
+# Configure and build
 cmake -B build -DCMAKE_BUILD_TYPE=Release
 cmake --build build --config Release
 ```
