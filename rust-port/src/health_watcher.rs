@@ -40,6 +40,11 @@ fn main() -> Result<()> {
         if let notify::EventKind::Modify(_) | notify::EventKind::Create(_) = event.kind {
             for path in event.paths {
                 if path.extension().map_or(false, |e| e == "sav") {
+                    // Skip .v.sav files (different format)
+                    let filename = path.file_name().unwrap_or_default().to_string_lossy();
+                    if filename.ends_with(".v.sav") {
+                        continue;
+                    }
                     if let Err(e) = process_sav_file(&path) {
                         eprintln!("Error processing {}: {}", path.display(), e);
                     }
@@ -70,15 +75,16 @@ fn process_sav_file(path: &Path) -> Result<()> {
 fn extract_health_values(luabins_data: &[u8]) -> Result<(f64, f64)> {
     let value = lua_serialize::parse_luabins(luabins_data)?;
 
-    // Navigate: LUA_DATA["currentRun"]["Hero"]["RallyHealth"]["Cache"]["MaxHealth"]
+    // Navigate: LUA_DATA["CurrentRun"]["Hero"]["MaxHealth"] and ["Health"]
+    // Note: CurrentRun (capital C) contains the active run data
     let max_health = get_nested_number(
         &value,
-        &["currentRun", "Hero", "RallyHealth", "Cache", "MaxHealth"],
+        &["CurrentRun", "Hero", "MaxHealth"],
     )?;
 
     let current_health = get_nested_number(
         &value,
-        &["currentRun", "Hero", "RallyHealth", "Cache", "CurrentHealth"],
+        &["CurrentRun", "Hero", "Health"],
     )?;
 
     Ok((max_health, current_health))
