@@ -61,6 +61,7 @@ fn process_sav_file(path: &Path) -> Result<()> {
     let save = hades_save::HadesSaveData::from_bytes(&data)?;
 
     let (max_health, current_health) = extract_health_values(&save.lua_bind_data)?;
+    let traits = extract_trait_cache(&save.lua_bind_data)?;
 
     println!(
         "{}: MaxHealth={}, CurrentHealth={}",
@@ -68,6 +69,10 @@ fn process_sav_file(path: &Path) -> Result<()> {
         max_health,
         current_health
     );
+
+    if !traits.is_empty() {
+        println!("  Traits: {}", traits.join(", "));
+    }
 
     Ok(())
 }
@@ -88,6 +93,51 @@ fn extract_health_values(luabins_data: &[u8]) -> Result<(f64, f64)> {
     )?;
 
     Ok((max_health, current_health))
+}
+
+fn extract_trait_cache(luabins_data: &[u8]) -> Result<Vec<String>> {
+    let value = lua_serialize::parse_luabins(luabins_data)?;
+
+    // For temp files (live monitoring), traits are in GameState.TraitsTaken
+    let traits_taken = get_nested_table(&value, &["CurrentRun", "Hero", "TraitDictionary"])?;
+
+    let mut traits = Vec::new();
+    if let lua_serialize::LuabinsValue::Table(entries) = traits_taken {
+        for (key, _) in entries {
+            if let lua_serialize::LuabinsValue::String(s) = key {
+                traits.push(s.clone());
+            }
+        }
+    }
+
+    traits.sort();
+    Ok(traits)
+}
+
+fn get_nested_table<'a>(value: &'a lua_serialize::LuabinsValue, keys: &[&str]) -> Result<&'a lua_serialize::LuabinsValue> {
+    let mut current = value;
+
+    for key in keys {
+        match current {
+            lua_serialize::LuabinsValue::Table(entries) => {
+                let found = entries.iter().find(|(k, _)| {
+                    if let lua_serialize::LuabinsValue::String(s) = k {
+                        s == *key
+                    } else {
+                        false
+                    }
+                });
+
+                match found {
+                    Some((_, v)) => current = v,
+                    None => bail!("Key not found: {}", key),
+                }
+            }
+            _ => bail!("Expected table at key: {}", key),
+        }
+    }
+
+    Ok(current)
 }
 
 fn get_nested_number(value: &lua_serialize::LuabinsValue, keys: &[&str]) -> Result<f64> {
