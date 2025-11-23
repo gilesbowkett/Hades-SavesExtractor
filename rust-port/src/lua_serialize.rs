@@ -174,10 +174,15 @@ fn serialize_value(value: &LuabinsValue, output: &mut String, nesting: usize) ->
 }
 
 fn format_number(n: f64) -> String {
+    // Handle negative zero
+    let n = if n == 0.0 { 0.0 } else { n };
+
     if n.fract() == 0.0 && n.abs() < 1e15 {
         format!("{}", n as i64)
     } else {
-        format!("{}", n)
+        // Use enough precision to preserve the value
+        let s = format!("{}", n);
+        s
     }
 }
 
@@ -198,7 +203,7 @@ pub fn lua_table_to_luabins(lua: &Lua, table: mlua::Table) -> Result<Vec<u8>> {
     Ok(output)
 }
 
-fn lua_value_to_luabins(_lua: &Lua, value: mlua::Value) -> Result<LuabinsValue> {
+fn lua_value_to_luabins(lua: &Lua, value: mlua::Value) -> Result<LuabinsValue> {
     match value {
         mlua::Value::Nil => Ok(LuabinsValue::Nil),
         mlua::Value::Boolean(b) => Ok(LuabinsValue::Boolean(b)),
@@ -206,13 +211,51 @@ fn lua_value_to_luabins(_lua: &Lua, value: mlua::Value) -> Result<LuabinsValue> 
         mlua::Value::Number(n) => Ok(LuabinsValue::Number(n)),
         mlua::Value::String(s) => Ok(LuabinsValue::String(s.to_str()?.to_string())),
         mlua::Value::Table(t) => {
-            let mut entries = Vec::new();
+            // Separate array and hash entries
+            // Array entries are sequential integer keys starting from 1
+            let mut array_entries = Vec::new();
+            let mut hash_entries = Vec::new();
+
+            // First, collect all entries
+            let mut all_entries: Vec<(mlua::Value, mlua::Value)> = Vec::new();
             for pair in t.pairs::<mlua::Value, mlua::Value>() {
                 let (k, v) = pair?;
-                let key = lua_value_to_luabins(_lua, k)?;
-                let val = lua_value_to_luabins(_lua, v)?;
-                entries.push((key, val));
+                all_entries.push((k, v));
             }
+
+            // Find the array portion: sequential integers starting from 1
+            let mut next_array_idx = 1i64;
+            loop {
+                let found = all_entries.iter().position(|(k, _)| {
+                    match k {
+                        mlua::Value::Integer(i) => *i == next_array_idx,
+                        mlua::Value::Number(n) => *n == next_array_idx as f64,
+                        _ => false,
+                    }
+                });
+
+                if let Some(idx) = found {
+                    let (k, v) = all_entries.remove(idx);
+                    let key = lua_value_to_luabins(lua, k)?;
+                    let val = lua_value_to_luabins(lua, v)?;
+                    array_entries.push((key, val));
+                    next_array_idx += 1;
+                } else {
+                    break;
+                }
+            }
+
+            // Remaining entries are hash entries
+            for (k, v) in all_entries {
+                let key = lua_value_to_luabins(lua, k)?;
+                let val = lua_value_to_luabins(lua, v)?;
+                hash_entries.push((key, val));
+            }
+
+            // Combine: array entries first, then hash entries
+            let mut entries = array_entries;
+            entries.extend(hash_entries);
+
             Ok(LuabinsValue::Table(entries))
         }
         _ => bail!("Unsupported Lua type for luabins serialization"),
