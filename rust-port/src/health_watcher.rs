@@ -98,7 +98,7 @@ fn extract_health_values(luabins_data: &[u8]) -> Result<(f64, f64)> {
 fn extract_trait_cache(luabins_data: &[u8]) -> Result<Vec<String>> {
     let value = lua_serialize::parse_luabins(luabins_data)?;
 
-    // For temp files (live monitoring), traits are in GameState.TraitsTaken
+    // For temp files (live monitoring), traits are in CurrentRun.Hero.TraitDictionary
     let traits_taken = get_nested_table(&value, &["CurrentRun", "Hero", "TraitDictionary"])?;
 
     let mut traits = Vec::new();
