@@ -95,6 +95,7 @@ fn extract_health_values(luabins_data: &[u8]) -> Result<(f64, f64)> {
     Ok((max_health, current_health))
 }
 
+// FIXME: this should be extract_traits
 fn extract_trait_cache(luabins_data: &[u8]) -> Result<Vec<String>> {
     let value = lua_serialize::parse_luabins(luabins_data)?;
 
