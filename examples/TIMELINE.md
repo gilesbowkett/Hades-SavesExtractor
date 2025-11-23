@@ -291,3 +291,50 @@ Codex entries are bulk-written on boon selection, tracking all encountered:
 
 ### 5. Music System
 The music stem system (`MusicActiveStems`, `MusicMutedStems`) controls which instrument layers are playing, creating dynamic music that responds to gameplay.
+
+### 6. Boon Choice Availability
+**The pending boon choices are not saved to disk before selection.** The save files at 11:12 (icon appeared) and 11:14 (boon screen visible) are byte-for-byte identical. The three boon options (in this case: `AphroditeSecondaryTrait`, `AphroditeRushTrait`, `AphroditeRetaliateTrait`) only appear in `LootChoiceHistory` *after* selection at 11:15, with the `Chosen = "true"/"false"` flags already set:
+
+```lua
+["LootChoiceHistory"] = {
+    -- ... previous choices ...
+    {
+        ["UpgradeName"] = "AphroditeUpgrade";
+        ["UpgradeChoices"] = {
+            {
+                ["Chosen"] = "false";
+                ["Name"] = "AphroditeSecondaryTrait";
+                ["Rarity"] = "Rare";
+            };
+            {
+                ["Chosen"] = "true";
+                ["Name"] = "AphroditeRushTrait";
+                ["Rarity"] = "Epic";
+            };
+            {
+                ["Chosen"] = "false";
+                ["Name"] = "AphroditeRetaliateTrait";
+                ["Rarity"] = "Common";
+            };
+        };
+        ["Depth"] = 4;
+    };
+};
+```
+
+The boon selection is handled entirely in memory by the game client. The options are generated, displayed, and once the player chooses, the entire interaction is written to the save as history. You cannot predict or monitor the available boon choices from the save file alone.
+
+### 7. God Offering Boons (Available Before Selection)
+**The save file does indicate which god is offering boons before the player chooses.** In `CurrentRun.CurrentRoom.ForceLootName`, you can see which god's boons are available:
+
+```lua
+["CurrentRoom"] = {
+    ["Name"] = "A_Combat13";
+    ["ForceLootName"] = "AphroditeUpgrade";
+    -- ...
+};
+```
+
+This is present in the 11:14 save (boon screen visible) before the player makes their selection. So while you cannot see the specific trait options, you can determine:
+- Which god is offering boons in the current room
+- The room name/type
